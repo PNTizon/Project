@@ -1,0 +1,97 @@
+using System.Data;
+
+namespace MyCalculator
+{
+    public partial class Calculator : Form
+    {
+        private string currentCalculation = "";
+        double result;
+        string firstNum;
+        string operation = string.Empty;
+        bool enterValue = false;
+
+        public Calculator()
+        {
+            InitializeComponent();
+
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+        private void button_click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            operation = button.Text;
+            enterValue = true;
+            
+            if (!string.IsNullOrEmpty(txtOutput.Text) && txtOutput.Text != "0")
+            {
+                firstNum = txtOutput.Text;  
+
+                textOperationBox.Text = firstNum + " " + operation;
+
+                txtOutput.Text = string.Empty;
+            }
+
+            currentCalculation += (sender as Button).Text;
+
+            string[] parts = currentCalculation.Split('.');
+            if (double.TryParse(parts[0].Replace(",", ""), out double numericValue))
+            {
+                txtOutput.Text = string.Format("{0:n0}", numericValue) + (parts.Length > 1 ? "." + parts[1] : "");
+            }
+            else
+            {
+                txtOutput.Text = currentCalculation;
+            }
+        }
+        private void btnPercent_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            txtOperationBox.Text = $"%({txtOutput.Text})";
+            txtOutput.Text = Convert.ToString(Convert.ToDouble(txtOutput.Text) / Convert.ToDouble(100));
+        }
+        private void EqualSign_Click(object sender, EventArgs e)
+        {
+            string formattedCalculation = currentCalculation;
+
+;           if (formattedCalculation.Contains("/0"))
+            {
+                txtOutput.Text = "Invalid!";
+                currentCalculation = "";
+                return;
+            }
+
+            try
+            {
+                var result = new DataTable().Compute(formattedCalculation, null);
+                txtOutput.Text = result?.ToString() ?? "Invalid calculation!";
+
+                currentCalculation = "";
+
+                textOperationBox.Text = $"{firstNum} {operation} = ";
+
+            }
+            catch (Exception ex)
+            {
+                txtOutput.Text = "ERROR";
+                currentCalculation = "";
+            }
+        }
+        private void Clear_Click(object sender, EventArgs e)
+        {
+            txtOutput.Text = "0";           
+            textOperationBox.Text = "";      
+            currentCalculation = "";
+        }
+        private void ClearEntry_Click(object sender, EventArgs e)
+        {
+            if (currentCalculation.Length > 0)
+            {
+                currentCalculation = currentCalculation.Remove(currentCalculation.Length - 1, 1);
+            }
+            txtOutput.Text = currentCalculation;
+        }
+    }
+}

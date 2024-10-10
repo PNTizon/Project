@@ -1,0 +1,137 @@
+using System.Data;
+
+namespace MyCalculator
+{
+    public partial class Calculator : Form
+    {
+        private string currentCalculation = "";
+        private string firstNum;
+        private string operation = "";
+        private double result = 0;
+
+        public Calculator()
+        {
+            InitializeComponent();
+        }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+        private void button_click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+
+            currentCalculation += button.Text;
+
+            txtOutput.Text = Comma_Dot_Click(currentCalculation);
+        }
+        private void operation_click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+
+            if (!string.IsNullOrEmpty(txtOutput.Text) && txtOutput.Text != "0")
+            {
+                firstNum = txtOutput.Text;
+                operation = button.Text;
+
+                textOperationBox.Text = $"{firstNum} {operation}";
+
+                currentCalculation = "";
+                txtOutput.Text = string.Empty;
+            }
+        }
+        private void btnPercent_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            txtOperationBox.Text = $"%({txtOutput.Text})";
+            txtOutput.Text = Convert.ToString(Convert.ToDouble(txtOutput.Text) / Convert.ToDouble(100));
+        }
+        private void EqualSign_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentCalculation) || string.IsNullOrEmpty(firstNum) || string.IsNullOrEmpty(operation))
+            {
+                txtOutput.Text = "ERROR";
+                return;
+            }
+
+            double firstNumber = Convert.ToDouble(RemoveCommas(firstNum));
+            double secondNumber = Convert.ToDouble(RemoveCommas(currentCalculation));
+
+            try
+            {
+                switch (operation)
+                {
+                    case "+":
+                        result = firstNumber + secondNumber;
+                        break;
+                    case "-":
+                        result = firstNumber - secondNumber;
+                        break;
+                    case "*":
+                        result = firstNumber * secondNumber;
+                        break;
+                    case "/":
+                        if (secondNumber == 0)
+                        {
+                            txtOutput.Text = "Invalid!";
+                            currentCalculation = "";
+                            return;
+                        }
+                        result = firstNumber / secondNumber;
+                        break;
+                    default:
+                        txtOutput.Text = "ERROR";
+                        return;
+                }
+
+                txtOutput.Text = result.ToString();
+                textOperationBox.Text = $"{firstNumber} {operation} {secondNumber} = ";
+
+                firstNum = result.ToString();
+                currentCalculation = "";
+                operation = "";
+            }
+            catch (Exception)
+            {
+                txtOutput.Text = "ERROR";
+                currentCalculation = "";
+            }
+        }
+        private void Clear_Click(object sender, EventArgs e)
+        {
+            txtOutput.Text = "0";
+            textOperationBox.Text = "";
+            currentCalculation = "";
+            firstNum = "";
+            operation = "";
+            result = 0;
+        }
+        private void ClearEntry_Click(object sender, EventArgs e)
+        {
+            if (currentCalculation.Length > 0)
+            {
+                currentCalculation = currentCalculation.Remove(currentCalculation.Length - 1, 1);
+            }
+            txtOutput.Text = currentCalculation;
+        }
+        private string Comma_Dot_Click(string input)
+        {
+            string cleanedInput = input.Replace(",", "");
+
+            if (double.TryParse(cleanedInput, out double numericValue))
+            {
+                string[] parts = input.Split('.');
+
+                string formattedNumber = $"{numericValue:n0}";
+
+                return parts.Length > 1 ? formattedNumber + "." + parts[1] : formattedNumber;
+            }
+            return cleanedInput;
+        }
+        private string RemoveCommas(string input)
+        {
+            return input.Replace(",", "");
+        }
+      
+    }
+}
